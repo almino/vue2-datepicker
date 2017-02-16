@@ -1,50 +1,48 @@
 <template lang="html">
-    <div v-bind:class="['ui', 'custom', 'popup' , 'bottom', 'center', { 'visible' : visible }]">
-        <div class="header">{{ year }}</div>
-        {{ formattedDate }}
+    <div class="calendar container">
+        <div class="week days container">
+            <div class="week day" v-for="day in weekDays">{{ day }}</div>
+        </div>
     </div>
 </template>
-
 <script>
-import moment from 'moment'
+    import moment from 'moment';
 
-export default {
-    props: {
-        locale: {
-            type: String,
-            default: window.navigator.userLanguage || window.navigator.language,
+    export default {
+        props: {
+            date: {},
+            locale: {
+                type: String,
+                default: window.navigator.userLanguage || window.navigator.language,
+            },
         },
-        date: {},
-        visible: {
-            type: Boolean,
-            required: false,
-            default: true,
-        }
-    },
-    data() {
-        return {
-            $date: this.date
-        }
-    },
-    computed: {
-        year() {
-            return this.$date.format('YYYY')
-        },
-        formattedDate() {
-            return this.$date.format('LL')
-        }
-    },
-    created() {
-        /* Make sure the date param is a valid object */
-        if (!this.date.isValid()) {
-            this.$date = moment()
+        computed: {
+            weekDays() {
+                /* http://stackoverflow.com/a/29641375/437459 */
+                /* https://www.youtube.com/watch?v=ISB5i__z9bI&t=1843s */
+                // var formatL = moment.localeData().longDateFormat('L');
 
-            /* Reset the locale according to the parameter */
-            this.$date.locale(this.locale)
+                var date = moment();
+                var days = [];
+
+                date.locale(this.locale)
+
+                for (var i = 0; i < 7; i++) {
+                    days.push(date.day(i).format('dddd').charAt(0).toUpperCase())
+                }
+
+                return days
+
+            }
         }
     }
-}
 </script>
-
-<style lang="css">
+<style lang="less">
+    [class*="calendar container"] {
+        >[class*="week days container"] {
+            display: flex;
+            justify-content: space-between;
+            // > [class*="week day"] {}
+        }
+    }
 </style>

@@ -1,59 +1,75 @@
 <template lang="html">
     <div>
-        <input
-            v-bind:id="id"
-            v-bind:accept="accept"
-            v-bind:alt="alt"
-            v-bind:autocomplete="autocomplete"
-            v-bind:autofocus="autofocus"
-            v-bind:checked="checked"
-            v-bind:dirname="dirname"
-            v-bind:disabled="disabled"
-            v-bind:form="form"
-            v-bind:formaction="formaction"
-            v-bind:formenctype="formenctype"
-            v-bind:formmethod="formmethod"
-            v-bind:formnovalidate="formnovalidate"
-            v-bind:formtarget="formtarget"
-            v-bind:list="list"
-            v-bind:max="max"
-            v-bind:maxlength="maxlength"
-            v-bind:min="min"
-            v-bind:multiple="multiple"
-            v-bind:pattern="pattern"
-            v-bind:placeholder="placeholder"
-            v-bind:readonly="readonly"
-            v-bind:required="required"
-            v-bind:src="src"
-            v-bind:step="step"
-            v-bind:type="type"
-            v-on:keydown="emitKeyDown" v-on:keypress="emitKeyPress"
-            v-on:keyup="emitKeyUp" v-on:mouseenter="emitMouseEnter"
-            v-on:mouseover="emitMouseOver" v-on:mousemove="emitMouseMove"
-            v-on:mousedown="emitMouseDown" v-on:mouseup="emitMouseUp"
-            v-on:click="emitClick" v-on:dblclick="emitDoubleClick"
-            v-on:contextmenu="emitContextMenu" v-on:wheel="emitWheel"
-            v-on:mouseleave="emitMouseLeave" v-on:mouseout="emitMouseOut"
-            v-on:select="emitSelect"
-            v-on:pointerlockchange="emitPointerLockChange"
-            v-on:pointerlockerror="emitPointerLockError"
-            v-on:focus="emitFocus" v-on:blur="emitBlur"
-            ref="input" v-bind:value="formattedDate" v-on:input="emitInput($event.target.value)" />
-        <input type="text" name="" v-bind:value="rawDate"
-            v-bind:name="name" />
-        <calendar v-bind:date="date" v-bind:locale="locale" />
+        <slot name="input">
+            <input
+                v-bind:id="id"
+                v-bind:accept="accept"
+                v-bind:alt="alt"
+                v-bind:autocomplete="autocomplete"
+                v-bind:autofocus="autofocus"
+                v-bind:checked="checked"
+                v-bind:dirname="dirname"
+                v-bind:disabled="disabled"
+                v-bind:form="form"
+                v-bind:formaction="formaction"
+                v-bind:formenctype="formenctype"
+                v-bind:formmethod="formmethod"
+                v-bind:formnovalidate="formnovalidate"
+                v-bind:formtarget="formtarget"
+                v-bind:list="list"
+                v-bind:max="max"
+                v-bind:maxlength="maxlength"
+                v-bind:min="min"
+                v-bind:multiple="multiple"
+                v-bind:pattern="pattern"
+                v-bind:placeholder="placeholder"
+                v-bind:readonly="readonly"
+                v-bind:required="required"
+                v-bind:src="src"
+                v-bind:step="step"
+                v-bind:type="type"
+                v-on:keydown="emitKeyDown"
+                v-on:keypress="emitKeyPress"
+                v-on:keyup="emitKeyUp"
+                v-on:mouseenter="emitMouseEnter"
+                v-on:mouseover="emitMouseOver"
+                v-on:mousemove="emitMouseMove"
+                v-on:mousedown="emitMouseDown"
+                v-on:mouseup="emitMouseUp"
+                v-on:click="emitClick"
+                v-on:dblclick="emitDoubleClick"
+                v-on:contextmenu="emitContextMenu"
+                v-on:wheel="emitWheel"
+                v-on:mouseleave="emitMouseLeave"
+                v-on:mouseout="emitMouseOut"
+                v-on:select="emitSelect"
+                v-on:pointerlockchange="emitPointerLockChange"
+                v-on:pointerlockerror="emitPointerLockError"
+                v-on:focus="emitFocus"
+                v-on:blur="emitBlur"
+                ref="input"
+                v-bind:value="formattedDate"
+                v-on:input="emitInput($event.target.value)" />
+        </slot>
+        <slot name="hidden-input">
+            <input type="hidden" name="" v-bind:value="rawDate"
+                v-bind:name="name" />
+        </slot>
+        <slot name="popup">
+            <popup v-bind:date="date" v-bind:locale="locale" />
+        </slot>
     </div>
 </template>
 
 <script>
 import Input from './mixins/input'
 import moment from 'moment'
-import Calendar from './Calendar.vue'
+import PopUp from './PopUp.vue'
 
 export default {
     mixins: [Input],
     components: {
-        calendar: Calendar
+        popup: PopUp
     },
     props: {
         formatValue: {
