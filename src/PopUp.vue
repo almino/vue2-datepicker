@@ -39,7 +39,20 @@ export default {
 
             /* Fix for Brazilian Portuguese lower case date */
             return this.$date.locale() == 'pt-br' ? date.toLowerCase() : date
-        }
+        },
+        $date() {
+            /* Make sure the date param is a valid object */
+            if (!this.date.isValid()) {
+                date = moment()
+
+                /* Reset the locale according to the parameter */
+                date.locale(this.locale)
+
+                return date
+            }
+
+            return this.date
+        },
     },
     created() {
         /* Make sure the date param is a valid object */

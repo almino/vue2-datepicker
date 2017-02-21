@@ -84,10 +84,6 @@ export default {
             type: String,
             default: window.navigator.userLanguage || window.navigator.language,
         },
-        // value: {
-        //     type: String,
-        //     default: moment().format(this.formatValue),
-        // },
     },
     created() {
         /* Reset the locale according to the parameter */
