@@ -27,7 +27,7 @@
                 v-bind:required="required"
                 v-bind:src="src"
                 v-bind:step="step"
-                v-bind:type="type"
+                type="text"
                 v-on:keydown="emitKeyDown"
                 v-on:keypress="emitKeyPress"
                 v-on:keyup="emitKeyUp"
@@ -48,8 +48,7 @@
                 v-on:focus="emitFocus"
                 v-on:blur="emitBlur"
                 ref="input"
-                v-bind:value="formattedDate"
-                v-on:input="emitInput($event.target.value)" />
+                v-model="formattedDate" />
         </slot>
         <slot name="hidden-input">
             <input type="hidden" name="" v-bind:value="rawDate"
@@ -65,6 +64,9 @@
 import Input from './mixins/input'
 import moment from 'moment'
 import PopUp from './PopUp.vue'
+
+const locale = window.navigator.userLanguage || window.navigator.language;
+moment.locale(locale)
 
 export default {
     mixins: [Input],
@@ -82,7 +84,7 @@ export default {
         },
         locale: {
             type: String,
-            default: window.navigator.userLanguage || window.navigator.language,
+            default: locale,
         },
     },
     created() {
@@ -91,17 +93,52 @@ export default {
     },
     data() {
         return {
-            date: moment(this.value, this.formatValue)
+            date: moment(this.value, this.formatValue, true),
+            timeout: null,
         }
     },
     computed: {
-        formattedDate() {
-            return this.value ? this.date.format(this.format) : null;
+        formattedDate: {
+            get() {
+                return this.value ? this.date.format(this.format) : null;
+            },
+            set(value) {
+                clearTimeout(this.timeout)
+
+                var vm = this;
+
+                this.timeout = setTimeout(function() {
+                    if (value != vm.formattedDate) {
+                        vm.date = moment(value, vm.date.localeData().longDateFormat(vm.format), true);
+                    }
+                }, 1000);
+            },
         },
         rawDate() {
             return this.value ? this.date.format('YYYY-MM-DD') : null;
         }
-    }
+    },
+    watch: {
+        date(val, old) {
+            if (val != old) {
+                this.date.locale(this.locale)
+            }
+        }
+    },
+    methods: {
+        // ref="input" v-bind:value="value" v-on:input="emitInput($event.target.value)"
+        emitInput(value) {
+            // If the value was not already normalized,
+            // manually override it to conform
+            if (value !== this.value) {
+                this.$refs.input.value = value
+                this.date = moment(value, this.formatValue)
+            }
+
+            // Emit the number value through the input event
+            this.$emit('input', value)
+        }
+    },
 }
 </script>
 

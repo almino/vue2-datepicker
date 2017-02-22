@@ -1,6 +1,6 @@
 <template lang="html">
-    <div v-bind:class="['ui', 'custom' , 'bottom', 'center', { 'visible' : visible }, 'popup', 'for', 'datepicker']">
-        <div class="header">{{ formattedDate }}</div>
+    <div v-bind:class="['ui', 'custom' , 'bottom', 'right', { 'visible' : visible }, 'popup', 'for', 'datepicker']">
+        <!-- <div class="header">{{ formattedDate }}</div> -->
         <calendar v-bind:date="$date" v-bind:locale="locale" />
     </div>
 </template>
@@ -25,25 +25,11 @@ export default {
             default: true,
         }
     },
-    data() {
-        return {
-            $date: this.date
-        }
-    },
     computed: {
-        year() {
-            return this.$date.format('YYYY')
-        },
-        formattedDate() {
-            var date = this.$date.format('LL')
-
-            /* Fix for Brazilian Portuguese lower case date */
-            return this.$date.locale() == 'pt-br' ? date.toLowerCase() : date
-        },
         $date() {
             /* Make sure the date param is a valid object */
             if (!this.date.isValid()) {
-                date = moment()
+                var date = moment()
 
                 /* Reset the locale according to the parameter */
                 date.locale(this.locale)
@@ -53,10 +39,16 @@ export default {
 
             return this.date
         },
+        formattedDate() {
+            var date = this.$date.format('LL')
+
+            /* Fix for Brazilian Portuguese lower case date */
+            return this.$date.locale() == 'pt-br' ? date.toLowerCase() : date
+        },
     },
     created() {
         /* Make sure the date param is a valid object */
-        if (!this.date.isValid()) {
+        if (typeof this.date == 'undefined' || !this.date.isValid()) {
             this.$date = moment()
 
             /* Reset the locale according to the parameter */
@@ -66,8 +58,11 @@ export default {
 }
 </script>
 
-<style lang="css" scoped>
-    .ui.custom[class*="bottom center"].popup[class*="for datepicker"] {
+<style lang="less" scoped>
+    .ui.custom[class*="bottom right"].popup[class*="for datepicker"] {
         top: 100%;
+        // left: 0;
+        // max-width: none;
+        // width: 25em;
     }
 </style>
