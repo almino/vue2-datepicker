@@ -1,7 +1,7 @@
 <template lang="html">
     <section class="calendar container">
         <div class="month and year container">
-            <div class="month container" v-on:click="$date.add(1, 'month')">{{ month }}</div>
+            <div class="month container" v-on:click="$emit('input', $date.clone().add(1, 'month'))">{{ month }}</div>
             <div class="year container">{{ year }}</div>
         </div>
         <div class="table container">
@@ -155,6 +155,7 @@
             // console.log(this.days[0][0].date.format('DD/MM/YYYY'))
             // console.log(this.ini.format('L'))
             // console.log(this.fin.format('L'))
+            // console.log(this.$date.add(1, 'month').format('L'))
         },
     }
 </script>
