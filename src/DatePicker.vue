@@ -16,8 +16,7 @@
                 v-bind:formmethod="formmethod"
                 v-bind:formnovalidate="formnovalidate"
                 v-bind:formtarget="formtarget"
-                v-bind:list="list"
-                v-bind:max="max"
+                v-bind:list="list" v-bind:max="max"
                 v-bind:maxlength="maxlength"
                 v-bind:min="min"
                 v-bind:multiple="multiple"
@@ -47,104 +46,95 @@
                 v-on:pointerlockerror="emitPointerLockError"
                 v-on:focus="emitFocus"
                 v-on:blur="emitBlur"
+                v-on:input="emitInput($event.target.value)"
                 ref="input"
                 v-model="formattedDate" />
         </slot>
         <slot name="hidden-input">
-            <input type="hidden" name="" v-bind:value="rawDate"
-                v-bind:name="name" />
+            <input type="hidden" name="" v-bind:value="rawDate" v-bind:name="name" />
         </slot>
         <slot name="popup">
-            <popup v-bind:date="date" v-bind:locale="locale" />
+            <popup v-bind:date="date" v-bind:locale="locale" v-on:input="setDate" />
         </slot>
     </div>
 </template>
 
 <script>
-import Input from './mixins/input'
-import moment from 'moment'
-import PopUp from './PopUp.vue'
+    import Input from './mixins/input'
+    import moment from 'moment'
+    import PopUp from './PopUp.vue'
 
-const locale = window.navigator.userLanguage || window.navigator.language;
-moment.locale(locale)
+    const locale = window.navigator.userLanguage || window.navigator.language;
+    moment.locale(locale)
 
-export default {
-    mixins: [Input],
-    components: {
-        popup: PopUp
-    },
-    props: {
-        klass: {
-            type: String,
-            default: 'ui fluid input',
+    export default {
+        mixins: [Input],
+        components: {
+            popup: PopUp
         },
-        formatValue: {
-            type: String,
-            default: 'YYYY-MM-DD',
-        },
-        format: {
-            type: String,
-            default: 'L',
-        },
-        locale: {
-            type: String,
-            default: locale,
-        },
-    },
-    created() {
-        /* Reset the locale according to the parameter */
-        this.date.locale(this.locale)
-    },
-    data() {
-        return {
-            date: moment(this.value, this.formatValue),
-            timeout: null,
-        }
-    },
-    computed: {
-        formattedDate: {
-            get() {
-                return this.value ? this.date.format(this.format) : null;
+        props: {
+            klass: {
+                type: String,
+                default: 'ui fluid input',
             },
-            set(value) {
-                clearTimeout(this.timeout)
-
-                var vm = this;
-
-                this.timeout = setTimeout(function() {
-                    /* http://stackoverflow.com/a/29641375/437459 */
-                    // var formatL = moment.localeData().longDateFormat('L');
-
-                    if (value != vm.formattedDate) {
-                        vm.date = moment(value, vm.date.localeData().longDateFormat(vm.format));
-                    }
-                }, 1000);
+            formatValue: {
+                type: String,
+                default: 'YYYY-MM-DD',
+            },
+            format: {
+                type: String,
+                /* http://stackoverflow.com/a/29641375/437459 */
+                default: moment.localeData().longDateFormat('L'),
+            },
+            locale: {
+                type: String,
+                default: locale,
             },
         },
-        rawDate() {
-            return this.value ? this.date.format('YYYY-MM-DD') : null;
-        }
-    },
-    watch: {
-        date(val, old) {
-            if (val != old) {
-                this.date.locale(this.locale)
+        created() {
+            /* Reset the locale according to the parameter */
+            this.date.locale(this.locale)
+        },
+        data() {
+            return {
+                date: moment(this.value, this.formatValue),
+                timeout: null,
             }
-        }
-    },
-    methods: {
-        // ref="input" v-bind:value="value" v-on:input="emitInput($event.target.value)"
-        emitInput(value) {
-            // If the value was not already normalized,
-            // manually override it to conform
-            if (value != this.value) {
-                this.$refs.input.value = value
-                this.date = moment(value, this.formatValue)
-            }
+        },
+        computed: {
+            formattedDate: {
+                get() {
+                    return this.date.isValid() ? this.date.format(this.format) :this.value;
+                },
+                set(value) {
+                    clearTimeout(this.timeout)
 
-            // Emit the number value through the input event
-            this.$emit('input', value)
-        }
-    },
-}
+                    var vm = this;
+
+                    this.timeout = setTimeout(function () {
+                        var date = moment(value, vm.format);
+
+                        if (!date.isSame(vm.date, 'day')) {
+                            vm.date = date;
+                        }
+                    }, 1000);
+                },
+            },
+            rawDate() {
+                return this.value ? this.date.format('YYYY-MM-DD') : null;
+            }
+        },
+        watch: {
+            date(val, old) {
+                if (val != old) {
+                    this.date.locale(this.locale)
+                }
+            }
+        },
+        methods: {
+            setDate(value) {
+                this.date = value;
+            },
+        },
+    }
 </script>

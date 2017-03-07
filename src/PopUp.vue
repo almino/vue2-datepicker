@@ -1,7 +1,7 @@
 <template lang="html">
     <div v-bind:class="klass">
         <!-- <div class="header">{{ formattedDate }}</div> -->
-        <calendar v-bind:date="$date" v-bind:locale="locale" />
+        <calendar v-bind:date="$date" v-bind:locale="locale" v-on:input="setDate" />
     </div>
 </template>
 
@@ -49,6 +49,11 @@ export default {
             /* Fix for Brazilian Portuguese lower case date */
             return this.$date.locale() == 'pt-br' ? date.toLowerCase() : date
         },
+    },
+    methods: {
+        setDate(value) {
+            return this.$emit('input', value);
+        }
     },
     created() {
         /* Make sure the date param is a valid object */

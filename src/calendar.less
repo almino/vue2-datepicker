@@ -1,40 +1,104 @@
- [class*="calendar container"] {
-     &>[class*="month container"] {
-         &>.week {
-             &>.day {
-                 /* Border */
-                 @borderColor : rgba(34, 36, 38, 0.15);
-                 /* Background */
-                 @backgroundColor: #E0E1E2;
-                 @backgroundImage: none;
-                 @background: @backgroundColor @backgroundImage;
-                 //~~
-                 /* Internal Shadow */
-                 @shadowDistance: 0em;
-                 @shadowOffset: (@shadowDistance / 2);
-                 @shadowBoxShadow: 0px -@shadowDistance 0px 0px @borderColor inset;
-                 //~~
-                 /* Box Shadow */
-                 @borderBoxShadowColor: transparent;
-                 @borderBoxShadowWidth: 1px;
-                 @borderBoxShadow: 0px 0px 0px @borderBoxShadowWidth @borderBoxShadowColor inset;
-                 @boxShadow: @borderBoxShadow,
-                 @shadowBoxShadow;
-                 //~~
-                 background-color: #E1E2E3;
-                 //~~
-                 border-radius: 4px;
-                 //~~
-                 &.previous,
-                 &.next {
-                     opacity: 1 !important;
-                 }
-                 //~~
-                 &.today {
-                     background-color: black;
-                     color: white;
-                 }
-             }
-         }
-     }
- }
+/*******************************
+            Model
+*******************************/
+
+// [class*="calendar container"] {
+//     &>[class*="table container"] {
+//         &>[class*="month container"] {
+//             &>[class*="week days container"] {
+//             }
+//             &>.week {
+//                 &>.day {
+//                     &.previous, &.next {
+//                     }
+//                     &.today {
+//                     }
+//                 }
+//             }
+//         }
+//     }
+// }
+
+/*******************************
+            Grid
+*******************************/
+
+& {
+    @type : 'collection';
+    @element : 'grid';
+    @import (multiple) '~semantic/src/theme.config';
+    [class*="calendar container"] {
+        &>[class*="table container"] {
+            &>[class*="week days container"] {
+                &>.day {
+                    box-shadow: @celledColumnDivider;
+                    &:first-child {
+                        box-shadow: none;
+                    }
+                }
+            }
+            &>[class*="month container"] {
+                &>.week {
+                    box-shadow: @celledRowDivider;
+                    &>.day {
+                        box-shadow: @celledColumnDivider;
+                        &:first-child {
+                            box-shadow: none;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+/*******************************
+             Table
+*******************************/
+
+& {
+    @type : 'collection';
+    @element : 'table';
+    @import (multiple) '~semantic/src/theme.config';
+    [class*="calendar container"] {
+        &>[class*="table container"] {
+            border: @border;
+            box-shadow: @boxShadow;
+            border-radius: @borderRadius;
+            border-spacing: @borderSpacing;
+            &>[class*="week days container"] {
+                box-shadow: @headerBoxShadow;
+                background: @headerBackground;
+                border-radius: @borderRadius @borderRadius 0em 0em;
+                &>.day {
+                    color: @headerColor;
+                    font-style: @headerFontStyle;
+                    font-weight: @headerFontWeight;
+                    text-transform: @headerTextTransform;
+                }
+            }
+            &>[class*="month container"] {
+                &>.week {
+                    &>.day {
+                        opacity: 1;
+                        &.previous,
+                        &.next {
+                            color: @disabledTextColor;
+                        }
+                        &.today {
+                            background: @positiveBackgroundColor !important;
+                            color: @positiveColor !important;
+                            font-weight: bold;
+                        }
+                        &.selected {
+                            background: @activeBackgroundColor !important;
+                            color: @activeColor !important;
+                            font-weight: bold;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
