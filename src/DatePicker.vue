@@ -1,5 +1,5 @@
 <template lang="html">
-    <div>
+    <div v-bind:class="klass">
         <slot name="input">
             <input
                 v-bind:id="id"
@@ -74,6 +74,10 @@ export default {
         popup: PopUp
     },
     props: {
+        klass: {
+            type: String,
+            default: 'ui fluid input',
+        },
         formatValue: {
             type: String,
             default: 'YYYY-MM-DD',
@@ -93,7 +97,7 @@ export default {
     },
     data() {
         return {
-            date: moment(this.value, this.formatValue, true),
+            date: moment(this.value, this.formatValue),
             timeout: null,
         }
     },
@@ -108,8 +112,11 @@ export default {
                 var vm = this;
 
                 this.timeout = setTimeout(function() {
+                    /* http://stackoverflow.com/a/29641375/437459 */
+                    // var formatL = moment.localeData().longDateFormat('L');
+
                     if (value != vm.formattedDate) {
-                        vm.date = moment(value, vm.date.localeData().longDateFormat(vm.format), true);
+                        vm.date = moment(value, vm.date.localeData().longDateFormat(vm.format));
                     }
                 }, 1000);
             },
@@ -130,7 +137,7 @@ export default {
         emitInput(value) {
             // If the value was not already normalized,
             // manually override it to conform
-            if (value !== this.value) {
+            if (value != this.value) {
                 this.$refs.input.value = value
                 this.date = moment(value, this.formatValue)
             }
@@ -141,6 +148,3 @@ export default {
     },
 }
 </script>
-
-<style lang="css">
-</style>

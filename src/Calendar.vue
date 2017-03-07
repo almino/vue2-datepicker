@@ -1,7 +1,7 @@
 <template lang="html">
     <section class="calendar container">
         <div class="month and year container">
-            <div class="month container">{{ month.text }}</div>
+            <div class="month container">{{ month }}</div>
             <div class="year container">{{ year }}</div>
         </div>
         <div class="week days container">
@@ -21,15 +21,19 @@
 <script>
     import moment from 'moment';
 
+    /* Get locale of the browser */
     const locale = window.navigator.userLanguage || window.navigator.language;
+    /* Set locale globally for Moment.js */
     moment.locale(locale)
 
     export default {
         props: {
+            /* Receives a Moment.js object */
             date: {},
+            /* Customize locale */
             locale: {
                 type: String,
-                default: window.navigator.userLanguage || window.navigator.language,
+                default: locale,
             },
         },
         data() {
@@ -42,6 +46,7 @@
             $date() {
                 /* Make sure the date param is a valid object */
                 if (!this.date.isValid()) {
+                    /* Calendar will show current date */
                     var date = moment()
 
                     /* Reset the locale according to the parameter */
@@ -50,78 +55,118 @@
                     return date
                 }
 
+                /* We can work with the date given */
                 return this.date
             },
             year() {
+                /* Year in four numbers format */
                 return this.$date.format('YYYY');
             },
             month() {
-                var a = this.$date.clone().startOf('month');
-                var z = this.$date.clone().endOf('month');
-
-                return {
-                    text: this.$date.format('MMMM'),
-                    previous: moment(z).month(-1).endOf('month').date(),
-                    day: {
-                        last: z.date(),
-                        week: {
-                            first: a.day(),
-                            last: z.day(),
-                        },
-                    },
-                }
-
+                /* Month full name */
+                return this.$date.format('MMMM');
             },
             weekDays() {
-                /* http://stackoverflow.com/a/29641375/437459 */
-                // var formatL = moment.localeData().longDateFormat('L');
-
+                /* https://momentjs.com/docs/#/i18n/listing-months-weekdays/ */
                 return this.locale == this.myLocale ? moment.weekdays() : moment.weekdaysMin()
             },
             days() {
+                /* Contains days for a week */
                 var row = [];
+                /* Contains weeks for a month */
                 var weeks = [];
 
+                /* Get the first day of given month */
                 var first = this.$date.clone().startOf('month');
+                /* Get the last day of given month */
                 var last = first.clone().endOf('month');
 
+                /* If the first day of given month is not a Sunday */
                 if (first.day() > 0) {
-                    var prev = first.clone().subtract(1, 'd');
-                    var sun = prev.date() - first.day();
+                    /* Get the last Sunday of the previous month */
+                    var current = first.clone().startOf('week');
 
-                    for (var i = sun; i < prev.date(); i++) {
-                        row.push({
-                            text: i + 1,
-                            klass: 'previous',
-                        });
+                    /* Loop through the days of the previous month
+                     * in the same week as the first days of given month */
+                    while (current.isBefore(first, 'day')) {
+                        var obj = {
+                            /* Raw moment object */
+                            date: current,
+                            /* The number of the day */
+                            text: current.date(),
+                            /* Class attribute to make it different from
+                             * given month days */
+                            klass: ['previous'],
+                        };
+
+                        /* Check if is today */
+                        if (this.isToday(current)) {
+                            /* Identifies as today */
+                            obj.klass.unshift('today');
+                        }
+
+                        /* Put in a row */
+                        row.push(obj);
+                        /* Next day! */
+                        current.add(1, 'd');
                     }
                 }
 
-                for (var i = 0; i < last.date(); i++) {
-                    row.push({
-                        text: i + 1,
-                        klass: 'current',
-                    });
+                /* Do not mess the condition above */
+                var current = first.clone();
 
-                    if (row.length == 7) {
+                /* Loop through the days of the given month */
+                while (current.isSameOrBefore(last, 'day')) {
+                    var obj = {
+                        /* Raw moment object */
+                        date: current,
+                        /* The number of the day */
+                        text: current.date(),
+                        /* Class attribute */
+                        klass: ['current'],
+                    };
+
+                    if (this.isToday(current)) {
+                        obj.klass.unshift('today');
+                    }
+
+                    row.push(obj);
+
+                    if (current.day() == 6) {
                         weeks.push(row);
                         row = [];
                     }
+
+                    current.add(1, 'd');
                 }
 
-                if (last.day() < 6) {
-                    for (var i = last.day(); i < 6; i++) {
-                        row.push({
-                            text: i - 1,
-                            klass: 'previous month'
-                        });
+                while (current.day() != 0) {
+                    var obj = {
+                        /* Raw moment object */
+                        date: current,
+                        /* The number of the day */
+                        text: current.date(),
+                        /* Class attribute to make it different from
+                         * given month days */
+                        klass: ['next'],
+                    };
+
+                    /* Check if is today */
+                    if (this.isToday(current)) {
+                        /* Identifies as today */
+                        obj.klass.unshift('today');
                     }
+
+                    /* Put in a row */
+                    row.push(obj);
+                    /* Next day! */
+                    current.add(1, 'd');
                 }
 
                 weeks.push(row);
 
                 return weeks;
-            },
+            }
         },
         watch: {
             date(newValue, oldValue) {
@@ -129,7 +174,7 @@
                     this.$date = newValue
                 }
 
-                console.log(this.month)
+                // console.log(this.month)
             },
         },
         methods: {
@@ -139,6 +184,11 @@
 
                 return date;
             },
+            isToday(obj) {
+                // return obj.isSame(this.moment('2017-04-01'), 'day');
+                // return obj.isSame(this.moment('2017-04-01'), 'day');
+                return obj.isSame(this.moment(), 'day');
+            }
         },
         created() {
             if (typeof this.date == 'undefined' || !this.date.isValid()) {
@@ -149,50 +199,48 @@
             // console.log(this.locale)
             // console.log(this.myLocale)
             // console.log(this.locale == this.myLocale)
-            console.log(this.month)
+            // console.log(this.month)
         },
     }
 </script>
 <style lang="less">
     [class*="calendar container"] {
-        @margin: .25em .5em;
+        @padding: .25em .5em;
         @width: 100% / 7;
-
-        & > [class*="month and year container"] {
+        &>[class*="month and year container"] {
             display: flex;
             justify-content: space-around;
         }
-
-        & > [class*="week days container"] {
+        &>[class*="week days container"] {
             display: flex;
             justify-content: space-around;
             position: relative;
-
             &.week {
                 font-weight: bold;
-
-                & > .day {
-                    margin: @margin;
+                &>.day {
+                    padding: @padding;
                     text-align: center;
                     width: @width;
                 }
             }
         }
-
-        & > [class*="month container"] {
-            & > .week {
+        &>[class*="month container"] {
+            &>.week {
                 display: flex;
                 position: relative;
-
-                & > .day {
+                &>.day {
                     display: inline-block;
                     flex-grow: 1;
-                    margin: @margin;
+                    padding: @padding;
                     text-align: center;
                     width: @width;
-
-                    &.previous {
+                    &.previous, &.next {
                         opacity: .6;
+                    }
+
+                    &.today {
+                        background-color: black;
+                        color: white;
                     }
                 }
             }

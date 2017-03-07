@@ -1,5 +1,5 @@
 <template lang="html">
-    <div v-bind:class="['ui', 'custom' , 'bottom', 'right', { 'visible' : visible }, 'popup', 'for', 'datepicker']">
+    <div v-bind:class="klass">
         <!-- <div class="header">{{ formattedDate }}</div> -->
         <calendar v-bind:date="$date" v-bind:locale="locale" />
     </div>
@@ -14,6 +14,10 @@ export default {
         calendar: Calendar,
     },
     props: {
+        klass: {
+            type: String,
+            default: 'ui custom bottom right visible popup for datepicker',
+        },
         locale: {
             type: String,
             default: window.navigator.userLanguage || window.navigator.language,
