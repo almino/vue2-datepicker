@@ -1,70 +1,51 @@
 <template lang="html">
     <div v-bind:class="klass">
         <!-- <div class="header">{{ formattedDate }}</div> -->
-        <calendar v-bind:date="$date" v-bind:locale="locale" v-on:input="setDate" />
+        <calendar v-model="date"
+            v-bind:locale="locale" v-on:input="setDate" />
     </div>
 </template>
 
 <script>
-import moment from 'moment'
-import Calendar from './Calendar.vue'
+    import moment from 'moment'
+    import Calendar from './Calendar.vue'
 
-export default {
-    components: {
-        calendar: Calendar,
-    },
-    props: {
-        klass: {
-            type: String,
-            default: 'ui custom bottom right visible popup for datepicker',
+    export default {
+        components: {
+            calendar: Calendar,
         },
-        locale: {
-            type: String,
-            default: window.navigator.userLanguage || window.navigator.language,
-        },
-        date: {},
-        visible: {
-            type: Boolean,
-            required: false,
-            default: true,
-        }
-    },
-    computed: {
-        $date() {
-            /* Make sure the date param is a valid object */
-            if (!moment.isMoment(this.date)) {
-                var date = moment()
-
-                /* Reset the locale according to the parameter */
-                date.locale(this.locale)
-
-                return date
+        props: {
+            klass: {
+                type: String,
+                default: 'ui custom bottom right visible popup for datepicker',
+            },
+            locale: {
+                type: String,
+                default: window.navigator.userLanguage || window.navigator.language,
+            },
+            /* Receives a Moment.js object */
+            value: {
+                type: [Date, moment],
+                default: () => moment(),
+            },
+            visible: {
+                type: Boolean,
+                required: false,
+                default: true,
             }
-
-            return this.date
         },
-        formattedDate() {
-            var date = this.$date.format('LL')
-
-            /* Fix for Brazilian Portuguese lower case date */
-            return this.$date.locale() == 'pt-br' ? date.toLowerCase() : date
+        computed: {
+            date() {
+                console.log(this.value)
+                return moment.isMoment(this.value) && this.value.isValid() ? this.value : moment(this.value).locale(this.locale)
+            },
         },
-    },
-    methods: {
-        setDate(value) {
-            return this.$emit('input', value);
-        }
-    },
-    created() {
-        /* Make sure the date param is a valid object */
-        if (typeof this.date == 'undefined' || !this.date.isValid()) {
-            this.$date = moment()
-
-            /* Reset the locale according to the parameter */
-            this.$date.locale(this.locale)
-        }
+        methods: {
+            setDate(value) {
+                return this.$emit('input', value);
+            }
+        },
     }
-}
 </script>
 
 <style lang="less" scoped>

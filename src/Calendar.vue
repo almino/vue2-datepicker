@@ -13,7 +13,7 @@
             <div class="month container">
                 <div class="week" v-for="week in days">
                     <template v-for="day in week">
-                        <time v-bind:class="[day.klass, 'month day']" v-on:click="$emit('input', day.date)">
+                        <time v-bind:class="[day.klass, 'month day']" v-on:click="$emit('input', value instanceof Date ? day.date.toDate() : day.date)">
                             {{ day.text }}
                         </time>
                     </template>
@@ -28,12 +28,15 @@
     /* Get locale of the browser */
     const locale = window.navigator.userLanguage || window.navigator.language;
     /* Set locale globally for Moment.js */
-    moment.locale(locale)
+    moment.locale(locale);
 
     export default {
         props: {
             /* Receives a Moment.js object */
-            date: {},
+            value: {
+                type: [moment, Date],
+                default: () => moment(),
+            },
             /* Customize locale */
             locale: {
                 type: String,
@@ -44,22 +47,29 @@
             return {
                 /* DO NOT change this */
                 myLocale: 'pt-BR',
-                current: this.date,
+                current: moment(this.value),
             }
         },
         computed: {
             $date() {
-                return moment.isMoment(this.date) ? this.date : moment()
+                return moment.isMoment(this.value) ? this.value : moment(this.value).locale(this.locale)
             },
             year() {
+                this.setLocale();
+
                 /* Year in four numbers format */
                 return this.current.format('YYYY');
             },
             month() {
+                this.setLocale();
+
                 /* Month full name */
                 return this.current.format('MMMM');
             },
             weekDays() {
+                /* Fix locale */
+                moment.locale(this.locale);
+
                 /* https://momentjs.com/docs/#/i18n/listing-months-weekdays/ */
                 return this.locale == this.myLocale ? moment.weekdays() : moment.weekdaysMin()
             },
@@ -72,6 +82,8 @@
                 if (!moment.isMoment(this.current)) {
                     this.current = moment();
                 }
+
+                this.setLocale();
 
                 /* We should start somewhere */
                 var current = this.current.clone().startOf('month').startOf('week');
@@ -109,7 +121,7 @@
                     row.push(obj);
 
                     /* One week per row */
-                    if (current.day() == 6) {
+                    if (current.weekday() == 6) {
                         weeks.push(row);
                         row = [];
                     }
@@ -124,35 +136,20 @@
             }
         },
         watch: {
-            date(newValue, oldValue) {
-                if (moment.isMoment(this.date)) {
-                    this.current = newValue
-                }
-
-                // console.log(this.month)
+            value(newValue, oldValue) {
+                this.current = moment.isMoment(this.value) ? newValue : moment(this.value);
             },
         },
         methods: {
             isToday(obj) {
-                // return obj.isSame(this.moment('2017-04-01'), 'day');
-                // return obj.isSame(this.moment('2017-02-28'), 'day');
                 return obj.isSame(moment(), 'day');
+            },
+            setLocale(locale) {
+                /* Optional parameter. Default is the locale attr / prop */
+                locale = (typeof locale === 'undefined') ? this.locale : locale;
+
+                this.current.locale(locale);
             }
-        },
-        // created() {
-        //     if (!moment.isMoment(this.date)) {
-        //         this.$date = this.moment();
-        //     }
-        // },
-        mounted() {
-            // console.log(this.locale)
-            // console.log(this.myLocale)
-            // console.log(this.locale == this.myLocale)
-            // console.log(this.month)
-            // console.log(this.days[0][0].date.format('DD/MM/YYYY'))
-            // console.log(this.ini.format('L'))
-            // console.log(this.fin.format('L'))
-            // console.log(this.$date.add(1, 'month').format('L'))
         },
     }
 </script>

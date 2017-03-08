@@ -54,7 +54,7 @@
             <input type="hidden" name="" v-bind:value="rawDate" v-bind:name="name" />
         </slot>
         <slot name="popup">
-            <popup v-bind:date="date" v-bind:locale="locale" v-on:input="setDate" />
+            <popup v-model="date" v-bind:locale="locale" v-on:input="setDate" />
         </slot>
     </div>
 </template>
@@ -90,7 +90,7 @@
             format: {
                 type: String,
                 /* http://stackoverflow.com/a/29641375/437459 */
-                default: moment.localeData().longDateFormat('L'),
+                default: moment.localeData(this.locale).longDateFormat('L'),
             },
             /* Multiple Locale Support http://momentjs.com/#multiple-locale-support  */
             locale: {
@@ -104,7 +104,7 @@
         },
         created() {
             /* Reset the locale according to the parameter */
-            this.date.locale(this.locale)
+            this.date.locale(this.locale);
         },
         data() {
             return {
@@ -115,7 +115,11 @@
         computed: {
             formattedDate: {
                 get() {
-                    return moment.isMoment(this.date) ? this.date.format(this.format) : this.value;
+                    if (moment.isMoment(this.date) && this.date.isValid()) {
+                        return this.date.format(this.format);
+                    }
+
+                    return this.value;
                 },
                 set(value) {
                     clearTimeout(this.timeout)
@@ -139,6 +143,24 @@
 
                 return this.value;
             }
+        },
+        watch: {
+            value(newValue) {
+                console.group('watch value');
+
+                if (moment.isMoment(newValue) && newValue.isValid()) {
+                    console.log('is a moment')
+                    this.date = newValue;
+                }
+
+                if (moment.isDate(newValue)) {
+                    console.log('is a date')
+                    this.date = moment(this.date);
+                }
+
+                console.log(this.date.format('L'));
+                console.groupEnd();
+            },
         },
         methods: {
             setDate(value) {
