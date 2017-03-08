@@ -1,7 +1,7 @@
 <template lang="html">
     <section class="calendar container">
         <div class="month and year container">
-            <div class="month container" v-on:click="$emit('input', $date.clone().add(1, 'month'))">{{ month }}</div>
+            <div class="month container" v-on:click="current = current.clone().add(1, 'month')">{{ month }}</div>
             <div class="year container">{{ year }}</div>
         </div>
         <div class="table container">
@@ -44,6 +44,7 @@
             return {
                 /* DO NOT change this */
                 myLocale: 'pt-BR',
+                current: this.date,
             }
         },
         computed: {
@@ -52,11 +53,11 @@
             },
             year() {
                 /* Year in four numbers format */
-                return this.$date.format('YYYY');
+                return this.current.format('YYYY');
             },
             month() {
                 /* Month full name */
-                return this.$date.format('MMMM');
+                return this.current.format('MMMM');
             },
             weekDays() {
                 /* https://momentjs.com/docs/#/i18n/listing-months-weekdays/ */
@@ -68,11 +69,13 @@
                 /* Contains weeks for a month */
                 var weeks = [];
 
-                var ini = moment(this.date).startOf('month').startOf('week');
-                var fin = moment(this.date).endOf('month').endOf('week');
+                if (!moment.isMoment(this.current)) {
+                    this.current = moment();
+                }
 
                 /* We should start somewhere */
-                var current = ini.clone();
+                var current = this.current.clone().startOf('month').startOf('week');
+                var fin = this.current.clone().endOf('month').endOf('week');
 
                 /* Loop through the days  */
                 while (current.isSameOrBefore(fin, 'day')) {
@@ -85,11 +88,11 @@
                         klass: ['current'],
                     };
 
-                    if (current.month() < this.date.month()) {
+                    if (current.month() < this.current.month()) {
                         obj.klass = ['previous']
                     }
 
-                    if (current.month() > this.date.month()) {
+                    if (current.month() > this.current.month()) {
                         obj.klass = ['next']
                     }
 
@@ -122,24 +125,18 @@
         },
         watch: {
             date(newValue, oldValue) {
-                if (newValue != this.$date) {
-                    this.$date = newValue
+                if (moment.isMoment(this.date)) {
+                    this.current = newValue
                 }
 
                 // console.log(this.month)
             },
         },
         methods: {
-            moment(value, format) {
-                var date = moment(value, format);
-                date.locale(this.locale);
-
-                return date;
-            },
             isToday(obj) {
                 // return obj.isSame(this.moment('2017-04-01'), 'day');
                 // return obj.isSame(this.moment('2017-02-28'), 'day');
-                return obj.isSame(this.moment(), 'day');
+                return obj.isSame(moment(), 'day');
             }
         },
         // created() {

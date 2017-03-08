@@ -46,7 +46,7 @@
                 v-on:pointerlockerror="emitPointerLockError"
                 v-on:focus="emitFocus"
                 v-on:blur="emitBlur"
-                v-on:input="emitInput($event.target.value)"
+                v-on:input="$emit('input', $event.target.value)"
                 ref="input"
                 v-model="formattedDate" />
         </slot>
@@ -64,32 +64,43 @@
     import moment from 'moment'
     import PopUp from './PopUp.vue'
 
+    /* Get current locale */
     const locale = window.navigator.userLanguage || window.navigator.language;
+    /* Set locale globally */
     moment.locale(locale)
 
     export default {
+        /* Events for input */
         mixins: [Input],
         components: {
             popup: PopUp
         },
         props: {
+            /* Container class attibute */
             klass: {
                 type: String,
                 default: 'ui fluid input',
             },
+            /* Format to send to server  */
             formatValue: {
                 type: String,
                 default: 'YYYY-MM-DD',
             },
+            /* Format visible for the user */
             format: {
                 type: String,
                 /* http://stackoverflow.com/a/29641375/437459 */
                 default: moment.localeData().longDateFormat('L'),
             },
+            /* Multiple Locale Support http://momentjs.com/#multiple-locale-support  */
             locale: {
                 type: String,
                 default: locale,
             },
+            /* The default value */
+            value: {
+                type: [moment, Date, Object, String]
+            }
         },
         created() {
             /* Reset the locale according to the parameter */
@@ -104,7 +115,7 @@
         computed: {
             formattedDate: {
                 get() {
-                    return this.date.isValid() ? this.date.format(this.format) :this.value;
+                    return moment.isMoment(this.date) ? this.date.format(this.format) : this.value;
                 },
                 set(value) {
                     clearTimeout(this.timeout)
@@ -121,20 +132,29 @@
                 },
             },
             rawDate() {
-                return this.value ? this.date.format('YYYY-MM-DD') : null;
-            }
-        },
-        watch: {
-            date(val, old) {
-                if (val != old) {
-                    this.date.locale(this.locale)
+                /* Method format is available for moment instances, only */
+                if (moment.isMoment(this.date)) {
+                    return this.value ? this.date.format(this.formatValue) : null;
                 }
+
+                return this.value;
             }
         },
         methods: {
             setDate(value) {
                 this.date = value;
-            },
+
+                if (moment.isDate(this.value)) {
+                    /* Return as a native Date object */
+                    value = value.toDate();
+                } else if (typeof this.value == "string" || this.value instanceof String) {
+                    /* Return a string */
+                    value = value.format(this.formatValue);
+                }
+
+                /* Inform to v-model that the value has changed  */
+                this.$emit('input', value);
+            }
         },
     }
 </script>

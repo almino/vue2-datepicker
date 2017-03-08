@@ -32,7 +32,7 @@ export default {
     computed: {
         $date() {
             /* Make sure the date param is a valid object */
-            if (!this.date.isValid()) {
+            if (!moment.isMoment(this.date)) {
                 var date = moment()
 
                 /* Reset the locale according to the parameter */
