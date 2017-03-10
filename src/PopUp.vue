@@ -36,7 +36,6 @@
         },
         computed: {
             date() {
-                console.log(this.value)
                 return moment.isMoment(this.value) && this.value.isValid() ? this.value : moment(this.value).locale(this.locale)
             },
         },

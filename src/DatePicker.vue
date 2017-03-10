@@ -146,20 +146,13 @@
         },
         watch: {
             value(newValue) {
-                console.group('watch value');
-
                 if (moment.isMoment(newValue) && newValue.isValid()) {
-                    console.log('is a moment')
                     this.date = newValue;
                 }
 
                 if (moment.isDate(newValue)) {
-                    console.log('is a date')
-                    this.date = moment(this.date);
+                    this.date = moment(newValue);
                 }
-
-                console.log(this.date.format('L'));
-                console.groupEnd();
             },
         },
         methods: {

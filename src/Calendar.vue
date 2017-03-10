@@ -79,7 +79,7 @@
                 /* Contains weeks for a month */
                 var weeks = [];
 
-                if (!moment.isMoment(this.current)) {
+                if (!moment.isMoment(this.current) || !this.current.isValid()) {
                     this.current = moment();
                 }
 
