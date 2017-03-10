@@ -46,12 +46,3 @@
         },
     }
 </script>
-
-<style lang="less" scoped>
-    .ui.custom[class*="bottom right"].popup[class*="for datepicker"] {
-        top: 100%;
-        // left: 0;
-        // max-width: none;
-        // width: 25em;
-    }
-</style>
