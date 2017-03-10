@@ -1,5 +1,5 @@
 <template lang="html">
-    <div v-bind:class="klass">
+    <div v-bind:class="[klass, 'for', 'datepicker']">
         <!-- <div class="header">{{ formattedDate }}</div> -->
         <calendar v-model="date"
             v-bind:locale="locale" v-on:input="setDate" />
@@ -17,7 +17,7 @@
         props: {
             klass: {
                 type: String,
-                default: 'ui custom bottom right visible popup for datepicker',
+                default: 'ui custom bottom right visible popup',
             },
             locale: {
                 type: String,
@@ -46,3 +46,11 @@
         },
     }
 </script>
+
+<style lang="less">
+    .for.datepicker {
+        [class*="calendar container"] {
+            margin: 0;
+        }
+    }
+</style>

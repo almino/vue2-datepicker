@@ -1,8 +1,14 @@
 <template lang="html">
     <section class="calendar container">
         <div class="month and year container">
-            <div class="month container" v-on:click="current = current.clone().add(1, 'month')">{{ month }}</div>
-            <div class="year container">{{ year }}</div>
+            <div class="month container">
+                <i class="left icon" v-on:click="current = current.clone().subtract(1, 'month')"></i>
+                {{ month }}
+                <i class="right icon" v-on:click="current = current.clone().add(1, 'month')"></i>
+            </div>
+            <div class="year container">
+                <input type="number" v-model="year" >
+            </div>
         </div>
         <div class="table container">
             <div class="week days container">
@@ -54,11 +60,16 @@
             $date() {
                 return moment.isMoment(this.value) ? this.value : moment(this.value).locale(this.locale)
             },
-            year() {
-                this.setLocale();
+            year: {
+                get() {
+                    this.setLocale();
 
-                /* Year in four numbers format */
-                return this.current.format('YYYY');
+                    /* Year in four numbers format */
+                    return this.current.format('YYYY');
+                },
+                set(value) {
+                    this.current = this.current.clone().year(value);
+                },
             },
             month() {
                 this.setLocale();
@@ -139,6 +150,9 @@
             value(newValue, oldValue) {
                 this.current = moment.isMoment(this.value) ? newValue : moment(this.value);
             },
+            year() {
+                // console.log(this.current.year())
+            },
         },
         methods: {
             isToday(obj) {
@@ -154,15 +168,93 @@
     }
 </script>
 <style lang="less">
-    [class*="calendar container"] {
+    @font-face {
+        font-family: 'FontAwesome';
+        src: url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/fonts/fontawesome-webfont.eot?v=4.7.0');
+        src: url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/fonts/fontawesome-webfont.eot?#iefix&v=4.7.0') format('embedded-opentype'), url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/fonts/fontawesome-webfont.woff2?v=4.7.0') format('woff2'), url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/fonts/fontawesome-webfont.woff?v=4.7.0') format('woff'), url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/fonts/fontawesome-webfont.ttf?v=4.7.0') format('truetype'), url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/fonts/fontawesome-webfont.svg?v=4.7.0#fontawesomeregular') format('svg');
+        font-weight: normal;
+        font-style: normal;
+    }
+
+    .calendar.container {
         @padding: .25em .5em;
         @width: 100% / 7;
-        &>[class*="month and year container"] {
+        @gray: rgba(0, 0, 0, 0.4);
+
+        margin: .5em;
+
+        &>[class*="month and year"].container {
             display: flex;
             justify-content: space-around;
+            // margin: .5em auto;
+            &>.month.container {
+                cursor: default;
+                min-width: 8em;
+                padding: .5em 0;
+                text-align: center;
+
+                & > i {
+                    /* https://github.com/Semantic-Org/Semantic-UI/blob/master/dist/components/icon.css#L27 */
+                    display: inline-block;
+                    opacity: 1;
+                    margin: 0em 0.25rem 0em 0em;
+                    width: 1.18em;
+                    height: 1em;
+                    font-family: 'FontAwesome';
+                    font-style: normal;
+                    font-weight: normal;
+                    text-decoration: inherit;
+                    text-align: center;
+                    speak: none;
+                    font-smoothing: antialiased;
+                    -moz-osx-font-smoothing: grayscale;
+                    -webkit-font-smoothing: antialiased;
+                    -webkit-backface-visibility: hidden;
+                            backface-visibility: hidden;
+
+                    /* https://github.com/Semantic-Org/Semantic-UI/blob/master/dist/components/icon.css#L122 */
+                    cursor: pointer;
+                    opacity: 0.8;
+                    -webkit-transition: opacity 0.1s ease;
+                    transition: opacity 0.1s ease;
+                    &:hover {
+                        /* https://github.com/Semantic-Org/Semantic-UI/blob/master/dist/components/icon.css#L131 */
+                        opacity: 1 !important;
+                    }
+
+                    &.left {
+                        float: left;
+                        &:before {
+                            /* https://github.com/Semantic-Org/Semantic-UI/blob/master/dist/components/icon.css#L1491 */
+                            content: "\f0d9";
+                        }
+                    }
+
+                    &.right {
+                        float: right;
+                        &:before {
+                            /* https://github.com/Semantic-Org/Semantic-UI/blob/master/dist/components/icon.css#L1495 */
+                            content: "\f0da";
+                        }
+                    }
+                }
+            }
+            &>.year.container {
+                >input {
+                    outline: 0;
+                    padding: 0.5em;
+                    text-align: right;
+                    width: 5em;
+                    /* https://github.com/Semantic-Org/Semantic-UI/blob/master/dist/components/input.css#L199 */
+                    border-color: transparent !important;
+                    background-color: transparent !important;
+                    // padding: 0em !important;
+                    box-shadow: none !important;
+                }
+            }
         }
-        &>[class*="table container"] {
-            &>[class*="week days container"] {
+        &>.table.container {
+            &>.week.days.container {
                 display: flex;
                 justify-content: space-around;
                 pointer-events: none;
@@ -178,22 +270,29 @@
                     }
                 }
             }
-            &>[class*="month container"] {
+            &>.month.container {
                 &>.week {
                     display: flex;
                     position: relative;
                     &>.day {
+                        cursor: pointer;
                         display: inline-block;
                         flex-grow: 1;
                         padding: @padding;
                         text-align: center;
                         width: @width;
+
+                        &:not(.disabled):not(.selected):hover {
+                            background-color: @gray;
+                            color: white !important;
+                        }
+
                         &.previous,
                         &.next {
-                            color: rgba(0, 0, 0, 0.4);
+                            color: @gray;
                         }
                         &.today {
-                            background-color: rgba(0, 0, 0, 0.4);
+                            background-color: @gray;
                             color: white;
                         }
                         &.selected {

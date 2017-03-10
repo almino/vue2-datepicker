@@ -10,19 +10,36 @@
             Model
 *******************************/
 
-// [class*="calendar container"] {
-//     &>[class*="table container"] {
-//         &>[class*="week days container"] {
+// .calendar.container {
+//     &>[class*="month and year"].container {
+//         &>.month.container {
+//             &>i {
+//                 &>.left {
+//                 }
+//                 &>.left {
+//                 }
+//             }
 //         }
-//         &>[class*="month container"] {
+//         &>.year.container {
+//             &>input {
+//             }
+//         }
+//     }
+//     &>.table.container {
+//         &>[class*="week days"].container {
+//         }
+//         &>.month.container {
 //             &>.week {
 //                 &>.day {
+//                     &:not(.disabled):not(.selected):hover {
+//                     }
 //                     &.previous, &.next {
 //                     }
 //                     &.today {
 //                     }
 //                     &.selected {
-
+//                     }
+//                     &.disabled {
 //                     }
 //                 }
 //             }
@@ -38,9 +55,9 @@
     @type : 'collection';
     @element : 'grid';
     @import (multiple) '~semantic/src/theme.config';
-    [class*="calendar container"] {
-        &>[class*="table container"] {
-            &>[class*="week days container"] {
+    .calendar.container {
+        &>.table.container {
+            &>[class*="week days"].container {
                 &>.day {
                     box-shadow: @celledColumnDivider;
                     &:first-child {
@@ -48,7 +65,7 @@
                     }
                 }
             }
-            &>[class*="month container"] {
+            &>.month.container {
                 &>.week {
                     box-shadow: @celledRowDivider;
                     &>.day {
@@ -72,16 +89,22 @@
     @type : 'collection';
     @element : 'table';
     @import (multiple) '~semantic/src/theme.config';
-    [class*="calendar container"] {
-        &>[class*="table container"] {
+    .calendar.container {
+        &>.table.container {
             border: @border;
             box-shadow: @boxShadow;
             border-radius: @borderRadius;
             border-spacing: @borderSpacing;
-            &>[class*="week days container"] {
+            box-shadow: @attachedBoxShadow;
+            // .ui[class*="bottom attached"].table
+            bottom: 0px;
+            margin-top: 0em;
+            top: @attachedBottomOffset;
+            box-shadow: @attachedBottomBoxShadow;
+            border-radius: 0em 0em @borderRadius @borderRadius;
+            &>[class*="week days"].container {
                 box-shadow: @headerBoxShadow;
                 background: @headerBackground;
-                border-radius: @borderRadius @borderRadius 0em 0em;
                 &>.day {
                     color: @headerColor;
                     font-style: @headerFontStyle;
@@ -89,10 +112,14 @@
                     text-transform: @headerTextTransform;
                 }
             }
-            &>[class*="month container"] {
+            &>.month.container {
                 &>.week {
                     &>.day {
                         opacity: 1;
+                        &:not(.disabled):not(.selected):hover {
+                            background: @selectableBackground !important;
+                            color: @selectableTextColor !important;
+                        }
                         &.previous,
                         &.next {
                             color: @disabledTextColor;
@@ -107,6 +134,60 @@
                             color: @activeColor !important;
                             font-weight: bold;
                         }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+/*******************************
+            Segment
+*******************************/
+
+& {
+    @type : 'element';
+    @element : 'segment';
+    @import (multiple) '~semantic/src/theme.config';
+    .calendar.container {
+        &>[class*="month and year"].container {
+            top: 0px;
+            bottom: 0px;
+            border-radius: 0px;
+            // margin: 0em @attachedHorizontalOffset;
+            // width: @attachedWidth;
+            // max-width: @attachedWidth;
+            box-shadow: @attachedBoxShadow;
+            border: @attachedBorder;
+            // .ui[class*="top attached"].segment
+            bottom: 0px;
+            margin-bottom: 0em;
+            top: @attachedTopOffset;
+            // margin-top: @verticalMargin;
+            border-radius: @borderRadius @borderRadius 0em 0em;
+            border-bottom: none;
+            &>.month.container {
+                &>i {
+                    &>.left {}
+                    &>.left {}
+                }
+            }
+            &>.year.container {
+                &>input {}
+            }
+        }
+        &>.table.container {
+            &>[class*="week days"].container {}
+            &>.month.container {
+                &>.week {
+                    &>.day {
+                        &:not(.disabled):not(.selected):hover {}
+                        &.previous,
+                        &.next {}
+                        &.today {}
+                        &.selected {}
+                        &.disabled {}
                     }
                 }
             }
