@@ -1,5 +1,5 @@
 <template lang="html">
-    <div v-bind:class="klass">
+    <div>
         <slot name="input">
             <input
                 v-bind:id="id"
@@ -16,10 +16,12 @@
                 v-bind:formmethod="formmethod"
                 v-bind:formnovalidate="formnovalidate"
                 v-bind:formtarget="formtarget"
-                v-bind:list="list" v-bind:max="max"
+                v-bind:list="list"
+                v-bind:max="max"
                 v-bind:maxlength="maxlength"
                 v-bind:min="min"
                 v-bind:multiple="multiple"
+                v-bind:name="name"
                 v-bind:pattern="pattern"
                 v-bind:placeholder="placeholder"
                 v-bind:readonly="readonly"
@@ -27,6 +29,7 @@
                 v-bind:src="src"
                 v-bind:step="step"
                 type="text"
+                v-bind:value="value"
                 v-on:keydown="emitKeyDown"
                 v-on:keypress="emitKeyPress"
                 v-on:keyup="emitKeyUp"
@@ -37,16 +40,21 @@
                 v-on:mouseup="emitMouseUp"
                 v-on:click="emitClick"
                 v-on:dblclick="emitDoubleClick"
-                v-on:contextmenu="emitContextMenu"
                 v-on:wheel="emitWheel"
                 v-on:mouseleave="emitMouseLeave"
                 v-on:mouseout="emitMouseOut"
-                v-on:select="emitSelect"
                 v-on:pointerlockchange="emitPointerLockChange"
                 v-on:pointerlockerror="emitPointerLockError"
-                v-on:focus="emitFocus"
                 v-on:blur="emitBlur"
-                v-on:input="$emit('input', $event.target.value)"
+                v-on:change="emitChange($event.target.value)"
+                v-on:contextmenu="emitContextMenu"
+                v-on:focus="emitFocus"
+                v-on:input="emitInput($event.target.value)"
+                v-on:invalid="emitInvalid"
+                v-on:reset="emitReset"
+                v-on:search="emitSearch"
+                v-on:select="emitSelect"
+                v-on:submit="emitSubmit"
                 ref="input"
                 v-model="formattedDate" />
         </slot>
@@ -54,7 +62,15 @@
             <input type="hidden" name="" v-bind:value="rawDate" v-bind:name="name" />
         </slot>
         <slot name="popup">
-            <popup v-model="date" v-bind:locale="locale" v-on:input="setDate" />
+            <transition enter-active-class="animate transition scale in" leave-active-class="animate transition scale out">
+                <popup
+                    v-model="date"
+                    v-bind:locale="locale"
+                    v-on:input="setDate"
+                    v-on:click="clicked = true"
+                    visible
+                    v-show="popup" />
+            </transition>
         </slot>
     </div>
 </template>
@@ -76,11 +92,6 @@
             popup: PopUp
         },
         props: {
-            /* Container class attibute */
-            klass: {
-                type: String,
-                default: 'ui fluid input',
-            },
             /* Format to send to server  */
             formatValue: {
                 type: String,
@@ -99,8 +110,12 @@
             },
             /* The default value */
             value: {
-                type: [moment, Date, Object, String]
-            }
+                type: [moment, Date, Object, String],
+            },
+            transition: {
+                type: String,
+                default: 'scale',
+            },
         },
         created() {
             /* Reset the locale according to the parameter */
@@ -110,6 +125,8 @@
             return {
                 date: moment(this.value, this.formatValue),
                 timeout: null,
+                popup: false,
+                clicked: false,
             }
         },
         computed: {
@@ -167,9 +184,15 @@
                     value = value.format(this.formatValue);
                 }
 
+                this.popup = false;
+
                 /* Inform to v-model that the value has changed  */
                 this.$emit('input', value);
-            }
+            },
+            emitFocus() {
+                this.popup = true;
+                this.$emit('focus');
+            },
         },
     }
 </script>

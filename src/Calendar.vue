@@ -19,7 +19,7 @@
             <div class="month container">
                 <div class="week" v-for="week in days">
                     <template v-for="day in week">
-                        <time v-bind:class="[day.klass, 'month day']" v-on:click="$emit('input', value instanceof Date ? day.date.toDate() : day.date)">
+                        <time v-bind:ref="day.date.format('MMDD')" v-bind:class="[day.klass, 'month day']" v-on:click="$emit('input', value instanceof Date ? day.date.toDate() : day.date)">
                             {{ day.text }}
                         </time>
                     </template>
@@ -163,7 +163,10 @@
                 locale = (typeof locale === 'undefined') ? this.locale : locale;
 
                 this.current.locale(locale);
-            }
+            },
+            focusToday() {
+                
+            },
         },
     }
 </script>
@@ -284,7 +287,7 @@
 
                         &:not(.disabled):not(.selected):hover {
                             background-color: @gray;
-                            color: white !important;
+                            color: white;
                         }
 
                         &.previous,
