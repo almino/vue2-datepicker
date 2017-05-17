@@ -1,13 +1,17 @@
 <template lang="html">
     <section class="calendar container">
         <div class="month and year container">
-            <div class="month container">
-                <i class="left icon" v-on:click="current = current.clone().subtract(1, 'month')"></i>
+            <div class="month container" v-on:wheel.prevent="rotate($event)">
+                <i v-bind:class="[{ 'disabled' : !canSub }, 'left icon']" v-on:click="subMonth"></i>
                 {{ month }}
-                <i class="right icon" v-on:click="current = current.clone().add(1, 'month')"></i>
+                <i v-bind:class="[{ 'disabled' : !canAdd }, 'right icon']" v-on:click="addMonth"></i>
             </div>
             <div class="year container">
-                <input type="number" v-model="year" >
+                <input
+                    type="number"
+                    v-model="year"
+                    v-bind:min="minYear"
+                    v-bind:max="maxYear" />
             </div>
         </div>
         <div class="table container">
@@ -19,7 +23,11 @@
             <div class="month container">
                 <div class="week" v-for="week in days">
                     <template v-for="day in week">
-                        <time v-bind:ref="day.date.format('MMDD')" v-bind:class="[day.klass, 'month day']" v-on:click="$emit('input', value instanceof Date ? day.date.toDate() : day.date)">
+                        <time
+                            v-bind:datetime="day.date.format('YYYY-MM-DD')"
+                            v-bind:class="[day.klass, 'month day']"
+                            v-on:click="setDate(day.date)"
+                            v-bind:ref="day.date.format('MMDD')">
                             {{ day.text }}
                         </time>
                     </template>
@@ -48,6 +56,20 @@
                 type: String,
                 default: locale,
             },
+            readonly: {
+                type: Boolean,
+                default() {
+                    return !this.$vnode.componentOptions.propsData.value
+                },
+            },
+            min: {
+                type: [moment, Date],
+                required: false,
+            },
+            max: {
+                type: [moment, Date],
+                required: false,
+            },
         },
         data() {
             return {
@@ -68,7 +90,7 @@
                     return this.current.format('YYYY');
                 },
                 set(value) {
-                    this.current = this.current.clone().year(value);
+                    this.setDate(this.current.clone().year(value))
                 },
             },
             month() {
@@ -119,13 +141,23 @@
                         obj.klass = ['next']
                     }
 
+                    /* Make sure we are working between min and max inclusive */
+                    if (!this.isBetween(current)) {
+                        obj.klass.unshift('disabled');
+                    }
+
                     /* Class to identify today */
                     if (this.isToday(current)) {
                         obj.klass.unshift('today');
                     }
 
+                    /* We don't want interactions here */
+                    if (this.readonly) {
+                        obj.klass.unshift('readonly');
+                    }
+                    
                     /* Mark as selected */
-                    if (current.isSame(this.$date, 'day')) {
+                    if (!this.readonly && current.isSame(this.$date, 'day')) {
                         obj.klass.unshift('selected');
                     }
 
@@ -144,7 +176,49 @@
                 weeks.push(row);
 
                 return weeks;
-            }
+            },
+            minimum() {
+                if (moment.isDate(this.min)) {
+                    return moment(this.min);
+                }
+                
+                return this.min;
+            },
+            maximum() {
+                if (moment.isDate(this.max)) {
+                    return moment(this.max);
+                }
+                
+                return this.max;
+            },
+            canAdd() {
+                if (typeof this.max == 'undefined') {
+                    return true;
+                }
+
+                return this.current.isBefore(this.maximum, 'day');
+            },
+            canSub() {
+                if (typeof this.min == 'undefined') {
+                    return true;
+                }
+                
+                return this.current.isAfter(this.minimum, 'day');
+            },
+            minYear() {
+                if (!this.max) {
+                    return false;
+                }
+
+                return this.minimum.format('YYYY');
+            },
+            maxYear() {
+                if (!this.min) {
+                    return false;
+                }
+
+                return this.maximum.format('YYYY');
+            },
         },
         watch: {
             value(newValue, oldValue) {
@@ -164,12 +238,59 @@
 
                 this.current.locale(locale);
             },
-            focusToday() {
-                
+            addMonth() {
+                if (this.canAdd) {
+                    this.current = this.current.clone().add(1, 'month')
+                }
             },
+            subMonth() {
+                if (this.canSub) {
+                    this.current = this.current.clone().subtract(1, 'month')
+                }
+            },
+            rotate(event) {
+                if (event.deltaY > 0) {
+                    this.subMonth();
+                }
+
+                if (event.deltaY < 0) {
+                    this.addMonth();
+                }
+            },
+            setDate(value) {
+                if (value.isSame(this.value, 'day')) {
+                    return false;
+                }
+
+                if (this.isBetween(value)) {
+                    this.current = value;
+                    this.$emit('input', this.value instanceof Date ? value.toDate() : value);
+                }
+            },
+            isBetween(value) {
+                if (!this.min && !this.max) {
+                    return true;
+                }
+
+                /*
+                 * http://momentjs.com/docs/#/query/is-between/
+                 * Is between inclusive
+                 */
+                return value.isBetween(this.minimum, this.maximum, 'day', '[]');
+            }
+        },
+        created() {
+            if (this.current.isAfter(this.max)) {
+                this.current = this.max;
+            }
+
+            if (this.current.isBefore(this.min)) {
+                this.current = this.min;
+            }
         },
     }
 </script>
+
 <style lang="less">
     @font-face {
         font-family: 'FontAwesome';
@@ -185,6 +306,7 @@
         @gray: rgba(0, 0, 0, 0.4);
 
         margin: .5em;
+        max-width: 15em;
 
         &>[class*="month and year"].container {
             display: flex;
@@ -197,12 +319,13 @@
                 text-align: center;
 
                 & > i {
-                    /* https://github.com/Semantic-Org/Semantic-UI/blob/master/dist/components/icon.css#L27 */
+                    /* https://github.com/Semantic-Org/Semantic-UI/blob/2.2.10/dist/components/icon.css#L27 */
                     display: inline-block;
-                    opacity: 1;
+                    // opacity: 1;
                     margin: 0em 0.25rem 0em 0em;
                     width: 1.18em;
                     height: 1em;
+                    // font-family: 'Icons';
                     font-family: 'FontAwesome';
                     font-style: normal;
                     font-weight: normal;
@@ -215,20 +338,25 @@
                     -webkit-backface-visibility: hidden;
                             backface-visibility: hidden;
 
-                    /* https://github.com/Semantic-Org/Semantic-UI/blob/master/dist/components/icon.css#L122 */
+                    /* https://github.com/Semantic-Org/Semantic-UI/blob/2.2.10/dist/components/icon.css#L122 */
                     cursor: pointer;
                     opacity: 0.8;
                     -webkit-transition: opacity 0.1s ease;
                     transition: opacity 0.1s ease;
-                    &:hover {
-                        /* https://github.com/Semantic-Org/Semantic-UI/blob/master/dist/components/icon.css#L131 */
+
+                    &:before {
+                        opacity: 0.8;
+                    }
+
+                    &:not(.disabled):hover {
+                        /* https://github.com/Semantic-Org/Semantic-UI/blob/2.2.10/dist/components/icon.css#L131 */
                         opacity: 1 !important;
                     }
 
                     &.left {
                         float: left;
                         &:before {
-                            /* https://github.com/Semantic-Org/Semantic-UI/blob/master/dist/components/icon.css#L1491 */
+                            /* https://github.com/Semantic-Org/Semantic-UI/blob/2.2.10/dist/components/icon.css#L1491 */
                             content: "\f0d9";
                         }
                     }
@@ -236,7 +364,7 @@
                     &.right {
                         float: right;
                         &:before {
-                            /* https://github.com/Semantic-Org/Semantic-UI/blob/master/dist/components/icon.css#L1495 */
+                            /* https://github.com/Semantic-Org/Semantic-UI/blob/2.2.10/dist/components/icon.css#L1495 */
                             content: "\f0da";
                         }
                     }
@@ -248,7 +376,7 @@
                     padding: 0.5em;
                     text-align: right;
                     width: 5em;
-                    /* https://github.com/Semantic-Org/Semantic-UI/blob/master/dist/components/input.css#L199 */
+                    /* https://github.com/Semantic-Org/Semantic-UI/blob/2.2.10/dist/components/input.css#L202 */
                     border-color: transparent !important;
                     background-color: transparent !important;
                     // padding: 0em !important;
@@ -285,13 +413,18 @@
                         text-align: center;
                         width: @width;
 
-                        &:not(.disabled):not(.selected):hover {
+                        &.readonly, &.disabled {
+                            cursor: default;
+                        }
+
+                        &:not(.readonly):not(.disabled):not(.selected):hover {
                             background-color: @gray;
                             color: white;
                         }
 
                         &.previous,
-                        &.next {
+                        &.next,
+                        &.disabled {
                             color: @gray;
                         }
                         &.today {
