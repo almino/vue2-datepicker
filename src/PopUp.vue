@@ -1,7 +1,9 @@
 <template lang="html">
-    <div v-bind:class="[getVisibleClass(), klass, 'for', 'datepicker']">
-        <calendar v-model="date"
-            v-bind:locale="locale" v-on:input="setDate" />
+    <div>
+        <calendar
+            v-model="date"
+            v-bind:locale="locale"
+            v-on:input="setDate" />
     </div>
 </template>
 
@@ -14,10 +16,6 @@
             calendar: Calendar,
         },
         props: {
-            klass: {
-                type: String,
-                default: 'ui custom bottom right popup',
-            },
             locale: {
                 type: String,
                 default: window.navigator.userLanguage || window.navigator.language,
@@ -47,9 +45,6 @@
             setDate(value) {
                 return this.$emit('input', value);
             },
-            getVisibleClass() {
-                return this.visible ? this.visibleClass : false;
-            }
         },
     }
 </script>
