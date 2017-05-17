@@ -2,9 +2,9 @@
     <section class="calendar container">
         <div class="month and year container">
             <div class="month container" v-on:wheel.prevent="rotate($event)">
-                <i v-bind:class="[{ 'disabled' : !canSub }, 'left icon']" v-on:click="subMonth"></i>
+                <i v-bind:class="[{ 'disabled' : !canSubMonth }, 'left icon']" v-on:click="subMonth"></i>
                 {{ month }}
-                <i v-bind:class="[{ 'disabled' : !canAdd }, 'right icon']" v-on:click="addMonth"></i>
+                <i v-bind:class="[{ 'disabled' : !canAddMonth }, 'right icon']" v-on:click="addMonth"></i>
             </div>
             <div class="year container">
                 <input
@@ -205,6 +205,20 @@
                 
                 return this.current.isAfter(this.minimum, 'day');
             },
+            canAddMonth() {
+                if (typeof this.max == 'undefined') {
+                    return true;
+                }
+
+                return this.current.isBefore(this.maximum, 'month');
+            },
+            canSubMonth() {
+                if (typeof this.min == 'undefined') {
+                    return true;
+                }
+                
+                return this.current.isAfter(this.minimum, 'month');
+            },
             minYear() {
                 if (!this.max) {
                     return false;
@@ -340,12 +354,17 @@
 
                     /* https://github.com/Semantic-Org/Semantic-UI/blob/2.2.10/dist/components/icon.css#L122 */
                     cursor: pointer;
-                    opacity: 0.8;
+                    opacity: 0.6;
                     -webkit-transition: opacity 0.1s ease;
                     transition: opacity 0.1s ease;
 
+                    &.disabled {
+                        cursor: default;
+                        opacity: 0;
+                    }
+
                     &:before {
-                        opacity: 0.8;
+                        opacity: 0.6;
                     }
 
                     &:not(.disabled):hover {
