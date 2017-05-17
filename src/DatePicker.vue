@@ -62,14 +62,18 @@
             <input type="hidden" name="" v-bind:value="rawDate" v-bind:name="name" />
         </slot>
         <slot name="popup">
-            <transition enter-active-class="animate transition scale in" leave-active-class="animate transition scale out">
+            <transition
+                v-bind:enter-active-class="enterActiveClass"
+                v-bind:leave-active-class="leaveActiveClass">
                 <popup
+                    class="visible ui custom bottom right popup for datepicker"
                     v-model="date"
                     v-bind:locale="locale"
                     v-on:input="setDate"
                     v-on:click="clicked = true"
                     visible
-                    v-show="popup" />
+                    v-show="popup"
+                    v-click-outside="hideBlurred" />
             </transition>
         </slot>
     </div>
@@ -112,9 +116,13 @@
             value: {
                 type: [moment, Date, Object, String],
             },
-            transition: {
+            enterActiveClass: {
                 type: String,
-                default: 'scale',
+                default: 'animate transition scale in',
+            },
+            leaveActiveClass: {
+                type: String,
+                default: 'animate transition scale out',
             },
         },
         created() {
@@ -148,6 +156,7 @@
 
                         if (!date.isSame(vm.date, 'day')) {
                             vm.date = date;
+                            console.log('changed');
                         }
                     }, 1000);
                 },
@@ -170,7 +179,7 @@
                 if (moment.isDate(newValue)) {
                     this.date = moment(newValue);
                 }
-            },
+            }
         },
         methods: {
             setDate(value) {
@@ -184,15 +193,85 @@
                     value = value.format(this.formatValue);
                 }
 
-                this.popup = false;
+                this.hide();
 
                 /* Inform to v-model that the value has changed  */
                 this.$emit('input', value);
             },
+            show() {
+                this.popup = true
+            },
+            hide() {
+                this.popup = false
+            },
+            toggle() {
+                this.popup = !this.popup
+            },
+            hideBlurred() {
+                var input = this.$refs.input;
+                /* If input lost focus */
+                if (input != document.activeElement) {
+                    /* Hide popup */
+                    this.hide();
+
+                    /* Stop timeout to set the date */
+                    // clearTimeout(this.timeout);
+                    
+                    /* Check if the value has changed */
+                    if (input.value && input.value != this.formattedDate) {
+                        /* Set the new value */
+                        this.setDate(moment(input.value, this.format));
+
+                        /* Notify a change */
+                        this.$emit('change');
+                    }
+
+                    /* Stop timeout to set the date */
+                    // clearTimeout(this.timeout);
+                }
+            },
             emitFocus() {
-                this.popup = true;
+                this.show();
                 this.$emit('focus');
             },
+        },
+        directives: {
+            /*
+             * http://stackoverflow.com/questions/43693665/vuejs-editable-close-when-click-outside-in-vuejs
+             * https://jsfiddle.net/Linusborg/Lx49LaL8/
+             */
+            'click-outside': {
+                bind: function (el, binding, vNode) {
+                    // Provided expression must evaluate to a function.
+                    if (typeof binding.value !== 'function') {
+                        const compName = vNode.context.name
+                        let warn = `[Vue-click-outside:] provided expression '${binding.expression}' is not a function, but has to be`
+                        if (compName) {
+                            warn += ` Found in component '${compName}'`
+                        }
+
+                        console.warn(warn)
+                    }
+                    // Define Handler and cache it on the element
+                    const bubble = binding.modifiers.bubble
+                    const handler = (e) => {
+                        if (bubble || (!el.contains(e.target) && el !== e.target)) {
+                            binding.value(e)
+                        }
+                    }
+                    el.__vueClickOutside__ = handler
+
+                    // add Event Listeners
+                    document.addEventListener('click', handler)
+                },
+
+                unbind: function (el, binding) {
+                    // Remove Event Listeners
+                    document.removeEventListener('click', el.__vueClickOutside__)
+                    el.__vueClickOutside__ = null
+
+                }
+            }
         },
     }
 </script>
