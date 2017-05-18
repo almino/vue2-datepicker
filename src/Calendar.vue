@@ -37,7 +37,7 @@
     </section>
 </template>
 <script>
-    import moment from 'moment';
+    import moment from 'moment-timezone';
 
     /* Get locale of the browser */
     const locale = window.navigator.userLanguage || window.navigator.language;
@@ -56,10 +56,14 @@
                 type: String,
                 default: locale,
             },
+            timezone: {
+                type: [String, Number],
+                default: () => moment.tz.guess()
+            },
             readonly: {
                 type: Boolean,
                 default() {
-                    return !this.$vnode.componentOptions.propsData.value
+                    return typeof this.$vnode.componentOptions.propsData.value == 'undefined'
                 },
             },
             min: {
@@ -75,7 +79,7 @@
             return {
                 /* DO NOT change this */
                 myLocale: 'pt-BR',
-                current: moment(this.value),
+                current: moment.tz(this.value, this.timezone),
             }
         },
         computed: {
@@ -90,7 +94,11 @@
                     return this.current.format('YYYY');
                 },
                 set(value) {
-                    this.setDate(this.current.clone().year(value))
+                    var updated = this.current.clone().year(value);
+
+                    if (this.isBetween(updated)) {
+                        this.current = updated;
+                    }
                 },
             },
             month() {
@@ -220,14 +228,14 @@
                 return this.current.isAfter(this.minimum, 'month');
             },
             minYear() {
-                if (!this.max) {
+                if (!this.min) {
                     return false;
                 }
 
                 return this.minimum.format('YYYY');
             },
             maxYear() {
-                if (!this.min) {
+                if (!this.max) {
                     return false;
                 }
 
@@ -272,7 +280,7 @@
                 }
             },
             setDate(value) {
-                if (value.isSame(this.value, 'day')) {
+                if (this.readonly || value.isSame(this.value, 'day')) {
                     return false;
                 }
 
@@ -280,9 +288,19 @@
                     this.current = value;
                     this.$emit('input', this.value instanceof Date ? value.toDate() : value);
                 }
+
+                return false;
             },
             isBetween(value) {
                 if (!this.min && !this.max) {
+                    return true;
+                }
+
+                if (!this.min && value.isBefore(this.max)) {
+                    return true;
+                }
+
+                if (!this.max && value.isAfter(this.min)) {
                     return true;
                 }
 
@@ -291,14 +309,16 @@
                  * Is between inclusive
                  */
                 return value.isBetween(this.minimum, this.maximum, 'day', '[]');
-            }
+            },
+            isMin: () => moment.isMoment(this.min) || moment.isDate(this.min),
+            isMax: () => moment.isMoment(this.max) || moment.isDate(this.max),
         },
         created() {
-            if (this.current.isAfter(this.max)) {
+            if (this.isMax() && this.current.isAfter(this.max)) {
                 this.current = this.max;
             }
 
-            if (this.current.isBefore(this.min)) {
+            if (this.isMin() && this.current.isBefore(this.min)) {
                 this.current = this.min;
             }
         },
@@ -374,7 +394,7 @@
 
                     &.left {
                         float: left;
-                        
+
                         &:before {
                             /* https://github.com/Semantic-Org/Semantic-UI/blob/2.2.10/dist/components/icon.css#L1491 */
                             content: "\f0d9";

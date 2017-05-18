@@ -81,7 +81,7 @@
 
 <script>
     import Input from './mixins/input'
-    import moment from 'moment'
+    import moment from 'moment-timezone'
     import PopUp from './PopUp.vue'
 
     /* Get current locale */
