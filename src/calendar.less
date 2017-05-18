@@ -11,35 +11,62 @@
 *******************************/
 
 // .calendar.container {
-//     &>[class*="month and year"].container {
-//         &>.month.container {
-//             &>i {
-//                 &>.left {
+//     & > [class*="month and year"].container {
+//         & > .month.container {
+//             & > i {
+//                 &.disabled {
 //                 }
-//                 &>.left {
+//
+//                 &:before {
+//                 }
+//
+//                 &:not(.disabled):hover {
+//                 }
+//
+//                 &.left {
+//                     &:before {
+//                     }
+//                 }
+//
+//                 &.right {
+//                     &:before {
+//                     }
 //                 }
 //             }
 //         }
-//         &>.year.container {
-//             &>input {
+//
+//         & > .year.container {
+//             & > input {
 //             }
 //         }
 //     }
-//     &>.table.container {
-//         &>[class*="week days"].container {
+//
+//     & > .table.container {
+//         & > .week.days.container {
+//             &.week {
+//                 & > .day {
+//                 }
+//             }
 //         }
-//         &>.month.container {
-//             &>.week {
-//                 &>.day {
-//                     &:not(.disabled):not(.selected):hover {
+//
+//         & > .month.container {
+//             & > .week {                
+//                 & > .day {
+//                     &.readonly, &.disabled {
 //                     }
-//                     &.previous, &.next {
+//
+//                     &:not(.readonly):not(.disabled):not(.selected):hover {
 //                     }
-//                     &.today {
-//                     }
-//                     &.selected {
-//                     }
+//
+//                     &.previous,
+//                     &.next,
 //                     &.disabled {
+//                     }
+//
+//                     &.today {    
+//                     }
+//
+//                     &.selected {        
 //                     }
 //                 }
 //             }

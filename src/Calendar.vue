@@ -322,11 +322,11 @@
         margin: .5em;
         max-width: 15em;
 
-        &>[class*="month and year"].container {
+        & > [class*="month and year"].container {
             display: flex;
             justify-content: space-around;
-            // margin: .5em auto;
-            &>.month.container {
+
+            & > .month.container {
                 cursor: default;
                 min-width: 8em;
                 padding: .5em 0;
@@ -374,6 +374,7 @@
 
                     &.left {
                         float: left;
+                        
                         &:before {
                             /* https://github.com/Semantic-Org/Semantic-UI/blob/2.2.10/dist/components/icon.css#L1491 */
                             content: "\f0d9";
@@ -382,6 +383,7 @@
 
                     &.right {
                         float: right;
+
                         &:before {
                             /* https://github.com/Semantic-Org/Semantic-UI/blob/2.2.10/dist/components/icon.css#L1495 */
                             content: "\f0da";
@@ -389,8 +391,9 @@
                     }
                 }
             }
-            &>.year.container {
-                >input {
+
+            & > .year.container {
+                & > input {
                     outline: 0;
                     padding: 0.5em;
                     text-align: right;
@@ -403,34 +406,38 @@
                 }
             }
         }
-        &>.table.container {
-            &>.week.days.container {
+
+        & > .table.container {
+            & > .week.days.container {
                 display: flex;
-                justify-content: space-around;
                 pointer-events: none;
                 position: relative;
+
                 &.week {
                     font-weight: bold;
                     pointer-events: none;
-                    &>.day {
+
+                    & > .day {
+                        flex-basis: @width;
                         padding: @padding;
                         pointer-events: none;
                         text-align: center;
-                        width: @width;
                     }
                 }
             }
-            &>.month.container {
-                &>.week {
+
+            & > .month.container {
+                & > .week {
                     display: flex;
                     position: relative;
-                    &>.day {
+                    justify-content: space-around;
+                    
+                    & > .day {
                         cursor: pointer;
                         display: inline-block;
-                        flex-grow: 1;
+                        flex-basis: @width;
                         padding: @padding;
                         text-align: center;
-                        width: @width;
 
                         &.readonly, &.disabled {
                             cursor: default;
@@ -446,10 +453,12 @@
                         &.disabled {
                             color: @gray;
                         }
+
                         &.today {
                             background-color: @gray;
                             color: white;
                         }
+
                         &.selected {
                             background-color: black;
                             color: white;

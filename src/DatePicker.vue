@@ -66,12 +66,12 @@
                 v-bind:enter-active-class="enterActiveClass"
                 v-bind:leave-active-class="leaveActiveClass">
                 <popup
-                    class="visible ui custom bottom right popup for datepicker"
+                    visible
                     v-model="date"
+                    v-bind:class="popupClass"
                     v-bind:locale="locale"
                     v-on:input="setDate"
                     v-on:click="clicked = true"
-                    visible
                     v-show="popup"
                     v-click-outside="hideBlurred" />
             </transition>
@@ -115,6 +115,9 @@
             /* The default value */
             value: {
                 type: [moment, Date, Object, String],
+            },
+            popupClass: {
+                default: 'visible ui custom bottom right popup for datepicker',
             },
             enterActiveClass: {
                 type: String,
