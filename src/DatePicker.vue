@@ -117,13 +117,13 @@
             },
             /* The default value */
             value: {
-                type: [moment, Date, Object, Array, Number, String],
+                type: [moment, Date, String],
             },
             min: {
-                type: [moment, Date, Object, Array, Number, String],
+                type: [moment, Date, String],
             },
             max: {
-                type: [moment, Date, Object, Array, Number, String],
+                type: [moment, Date, String],
             },
             popupClass: {
                 default: 'visible ui custom bottom right popup for datepicker',
