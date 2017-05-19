@@ -1,9 +1,12 @@
 import moment from 'moment-timezone'
 
-moment.tz.setDefault(moment.tz.guess());
+/* Set locale globally for Moment.js */
+moment.locale(window.navigator.userLanguage || window.navigator.language)
 
-export default {
-    methods: {
-        moment: () => moment().utc(moment.tz.zone(moment.tz.guess())),
-    },
-}
+/* Set default timezone using UTC offset */
+moment.utc(moment.tz.zone(moment.tz.guess()))
+
+/* Setting default timezone using String */
+moment.tz.setDefault(moment.tz.guess())
+
+export default moment
