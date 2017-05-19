@@ -1,6 +1,6 @@
 {
-  "name": "vue2-datepicker",
-  "version": "1.0.0",
+  "name": "vue2-datetimepicker",
+  "version": "0.1.0",
   "description": "Shows a calendar to pick a date using moment.js",
   "main": "index.js",
   "scripts": {
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/almino/vue2-datepicker.git"
+    "url": "git+https://github.com/almino/vue2-datetimepicker.git"
   },
   "keywords": [
     "datepicker",
@@ -18,7 +18,7 @@
     "datepick",
     "date"
   ],
-  "author": "Almino Melo <almino.melo@gmail.com>",
+  "author": "Almino Melo <almino.melo@gmail.com> (https://facebook.com/almino8)",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/almino/vue2-datepicker/issues"
