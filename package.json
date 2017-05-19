@@ -1,6 +1,6 @@
 {
   "name": "vue2-datetimepicker",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Shows a calendar to pick a date using moment.js",
   "main": "index.js",
   "scripts": {
