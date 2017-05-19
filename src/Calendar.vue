@@ -37,12 +37,13 @@
     </section>
 </template>
 <script>
-    import moment from 'moment-timezone';
-
+    import moment from 'moment'
+    
     /* Get locale of the browser */
     const locale = window.navigator.userLanguage || window.navigator.language;
+
     /* Set locale globally for Moment.js */
-    moment.locale(locale);
+    moment.locale(locale)
 
     export default {
         props: {
@@ -56,13 +57,8 @@
                 type: String,
                 default: locale,
             },
-            timezone: {
-                type: [String, Number],
-                default: () => moment.tz.guess()
-            },
             readonly: {
-                type: Boolean,
-                default() {
+                type: Boolean,default() {
                     return typeof this.$vnode.componentOptions.propsData.value == 'undefined'
                 },
             },
@@ -79,12 +75,12 @@
             return {
                 /* DO NOT change this */
                 myLocale: 'pt-BR',
-                current: moment.tz(this.value, this.timezone),
+                current: moment(this.value),
             }
         },
         computed: {
             $date() {
-                return moment.isMoment(this.value) ? this.value : moment(this.value).locale(this.locale)
+                return moment.isMoment(this.value) ? this.value : moment(this.value)
             },
             year: {
                 get() {
@@ -121,7 +117,7 @@
                 var weeks = [];
 
                 if (!moment.isMoment(this.current) || !this.current.isValid()) {
-                    this.current = moment();
+                    this.current = moment().locale(this.locale);
                 }
 
                 this.setLocale();
@@ -200,14 +196,14 @@
                 return this.max;
             },
             canAdd() {
-                if (typeof this.max == 'undefined') {
+                if (!this.isMax()) {
                     return true;
                 }
 
                 return this.current.isBefore(this.maximum, 'day');
             },
             canSub() {
-                if (typeof this.min == 'undefined') {
+                if (!this.isMin()) {
                     return true;
                 }
                 
@@ -245,9 +241,6 @@
         watch: {
             value(newValue, oldValue) {
                 this.current = moment.isMoment(this.value) ? newValue : moment(this.value);
-            },
-            year() {
-                // console.log(this.current.year())
             },
         },
         methods: {
@@ -296,11 +289,11 @@
                     return true;
                 }
 
-                if (!this.min && value.isBefore(this.max)) {
+                if (!this.min && value.isSameOrBefore(this.max, 'day')) {
                     return true;
                 }
 
-                if (!this.max && value.isAfter(this.min)) {
+                if (!this.max && value.isSameOrAfter(this.min, 'day')) {
                     return true;
                 }
 
@@ -310,16 +303,19 @@
                  */
                 return value.isBetween(this.minimum, this.maximum, 'day', '[]');
             },
-            isMin: () => moment.isMoment(this.min) || moment.isDate(this.min),
-            isMax: () => moment.isMoment(this.max) || moment.isDate(this.max),
+            isMin() { return (moment.isMoment(this.min) && this.min.isValid()) || moment.isDate(this.min) },
+            isMax() { return (moment.isMoment(this.max) && this.max.isValid()) || moment.isDate(this.max) },
         },
         created() {
-            if (this.isMax() && this.current.isAfter(this.max)) {
-                this.current = this.max;
+            if (!this.current.isValid()) {
+                this.current = moment().locale(this.locale);
             }
-
-            if (this.isMin() && this.current.isBefore(this.min)) {
-                this.current = this.min;
+            
+            if (this.isMax() && this.current.isAfter(this.max, 'day')) {
+                this.current = this.maximum;
+            }
+            if (this.isMin() && this.current.isBefore(this.min, 'day')) {
+                this.current = this.minimum;
             }
         },
     }

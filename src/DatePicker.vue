@@ -68,6 +68,8 @@
                 <popup
                     visible
                     v-model="date"
+                    v-bind:min="minimum"
+                    v-bind:max="maximum"
                     v-bind:class="popupClass"
                     v-bind:locale="locale"
                     v-on:input="setDate"
@@ -81,12 +83,13 @@
 
 <script>
     import Input from './mixins/input'
-    import moment from 'moment-timezone'
     import PopUp from './PopUp.vue'
-
-    /* Get current locale */
+    import moment from 'moment'
+    
+    /* Get locale of the browser */
     const locale = window.navigator.userLanguage || window.navigator.language;
-    /* Set locale globally */
+
+    /* Set locale globally for Moment.js */
     moment.locale(locale)
 
     export default {
@@ -114,7 +117,13 @@
             },
             /* The default value */
             value: {
-                type: [moment, Date, Object, String],
+                type: [moment, Date, Object, Array, Number, String],
+            },
+            min: {
+                type: [moment, Date, Object, Array, Number, String],
+            },
+            max: {
+                type: [moment, Date, Object, Array, Number, String],
             },
             popupClass: {
                 default: 'visible ui custom bottom right popup for datepicker',
@@ -135,6 +144,8 @@
         data() {
             return {
                 date: moment(this.value, this.formatValue),
+                minimum: this.min ? moment(this.min, this.formatValue) : null,
+                maximum: this.max ? moment(this.max, this.formatValue) : null,
                 timeout: null,
                 popup: false,
                 clicked: false,

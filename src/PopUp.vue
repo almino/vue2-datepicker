@@ -2,13 +2,15 @@
     <div>
         <calendar
             v-model="date"
+            v-bind:min="min"
+            v-bind:max="max"
             v-bind:locale="locale"
             v-on:input="setDate" />
     </div>
 </template>
 
 <script>
-    import moment from 'moment-timezone'
+    import moment from 'moment'
     import Calendar from './Calendar.vue'
 
     export default {
@@ -23,17 +25,13 @@
             /* Receives a Moment.js object */
             value: {
                 type: [Date, moment],
-                default: () => moment(),
+                // default: () => moment(),
             },
-            visible: {
-                type: Boolean,
-                required: false,
-                default: true,
+            min: {
+                type: [Date, moment],
             },
-            visibleClass: {
-                type: String,
-                required: false,
-                default: 'visible',
+            max: {
+                type: [Date, moment],
             },
         },
         computed: {
